@@ -25,7 +25,7 @@ notify call is dropped with "<title> notification: Already running", so the
 clear never reached the phone and the Live Activity stayed on the lock screen
 with its chronometer counting into negative numbers.
 
-Uses the real `hass` and a real `Script` (not the mock most modules use) with a
+Issue #517. Uses the real `hass` and a real `Script` (not the mock most modules use) with a
 notify service that blocks until released, which is exactly the overlap a slow
 push delivery creates.
 """
