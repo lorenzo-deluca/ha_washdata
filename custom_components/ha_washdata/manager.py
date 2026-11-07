@@ -520,6 +520,11 @@ def _apply_post_cycle_anomalies(cycle_data: dict[str, Any], store: Any) -> None:
 # service only when the target is a mobile app. Includes the iOS Live Activity
 # enrichment keys (subtitle/content_state/activity) so they never reach non-mobile
 # platforms.
+# Notification-action runs that may wait behind the one in progress. Dispatches
+# come in short bursts (two or three per cycle event), so this only bounds a
+# notify service that hangs; past it Home Assistant logs and drops the run.
+_NOTIFY_ACTIONS_MAX_QUEUED = 20
+
 _MOBILE_ONLY_EXTRA_KEYS = (
     "tag",
     "timeout",
@@ -7796,6 +7801,16 @@ class WashDataManager:
                     name=f"{self.config_entry.title} notification",
                     domain=DOMAIN,
                     logger=_LOGGER,
+                    # Queued, not the default "single": the manager dispatches
+                    # back to back (the finished alert and then the live
+                    # activity's clear_notification, the start alert and the
+                    # first live card), and in "single" mode every dispatch that
+                    # lands while the previous run is still awaiting its notify
+                    # call is dropped with "Already running". Dropping the clear
+                    # leaves the Live Activity on the lock screen. Queued keeps
+                    # every notification and their order.
+                    script_mode=script_helper.SCRIPT_MODE_QUEUED,
+                    max_runs=_NOTIFY_ACTIONS_MAX_QUEUED,
                 )
             except vol.Invalid as err:
                 self._logger.error(

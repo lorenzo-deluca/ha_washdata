@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 Releases 0.5.4 and earlier are in [CHANGELOG-archive.md](CHANGELOG-archive.md).
 
+## Unreleased
+
+### Fixes
+
+- **Notification actions no longer drop a notification sent right after another**: with custom notification actions, a notification dispatched while the previous one was still being delivered was discarded ("Already running"), most visibly the clear that ends the iOS Live Activity after the finished alert, which left the activity stuck on the lock screen. Notification actions now run queued, in order.
+
 ## 0.5.9.1 - 2026-10-29
 
 ### TL;DR
